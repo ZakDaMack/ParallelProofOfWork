@@ -5,6 +5,7 @@
  */
 package parallelproofofwork;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -15,15 +16,48 @@ import java.util.Random;
  */
 public class ParallelProofOfWork {
     
-    private int RandomNumber() {
-        throw new UnsupportedOperationException();
+    final static String Difficulty = "000000";
+    final static String Message = "This message is being hashed";
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        // count how many iterations it did before being successful
+        int iterations = 0;
+        
+        // start the actually algorith, start counting the time
+        long startTime = System.currentTimeMillis();
+        String result;
+        String nonce;
+        do {
+            iterations++;
+            nonce = RandomNonce();
+            result = HashMessage(Message + nonce);
+        }
+        while (!result.startsWith(Difficulty));
+        
+        // Print results
+        long timeToComplete = System.currentTimeMillis() - startTime;
+        System.out.println("\nProof Of Work Complete\n----------------------------");
+        System.out.println(iterations + " iterations, " + timeToComplete + "ms, nonce: " + nonce + " result: " + result);
     }
     
-    private static String HashMessage(String msg) throws NoSuchAlgorithmException {
+    
+    
+    
+    private static String RandomNonce() {
+        Random rand = new Random();
+        return Integer.toString(
+            rand.nextInt((int)Math.pow(2, 32)) // max integer size, do we need to change to big int
+        );
+    }
+    
+    private static String HashMessage(String msg) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest hasher = MessageDigest.getInstance("SHA-256");
         return BytesToHex(
                 hasher.digest(
-                        msg.getBytes()
+                        msg.getBytes("UTF-8")
                 )
         );
     }
@@ -36,30 +70,6 @@ public class ParallelProofOfWork {
             hexString.append(hex);
         }
         return hexString.toString();
-    }
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-        String Difficulty = "00000";
-        
-        Random rand = new Random();
-        String message = "This message is being hashed";
-        int iterations = 0;
-        
-        long startTime = System.currentTimeMillis();
-        String result;
-        do {
-            iterations++;
-            int nonce = rand.nextInt(1000000);
-            result = HashMessage(message + Integer.toString(nonce));
-        } while (!result.startsWith(Difficulty));
-        
-        long timeToComplete = System.currentTimeMillis() - startTime;
-        System. out. println(iterations + " iterations, " + timeToComplete + "ms");
-        
-        
     }
     
 }
